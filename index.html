@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checklist de Ferramentas — Netway</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════
+   TOKENS
+══════════════════════════════════════════ */
+:root {
+  --ink:    #1a1a2e;
+  --paper:  #f5f0e8;
+  --bg:     #fdfaf4;
+  --accent: #c84b31;
+  --green:  #2d6a4f;
+  --muted:  #8a8070;
+  --line:   #d4cfc4;
+  --ok:     #2d6a4f;
+  --nok:    #c84b31;
+}
+*{ box-sizing:border-box; margin:0; padding:0; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  background-image: repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(0,0,0,.04) 27px,rgba(0,0,0,.04) 28px);
+}
+
+/* ══════════════════════════════════════════
+   NAV DE ABAS
+══════════════════════════════════════════ */
+.tab-nav {
+  display: flex;
+  gap: 0;
+  padding: 1.2rem 1rem 0;
+  max-width: 960px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.tab-btn {
+  padding: 0.55rem 1.5rem;
+  border: 1.5px solid var(--line);
+  border-bottom: none;
+  background: rgba(245,240,232,0.6);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all .15s;
+  margin-right: -1px;
+  position: relative;
+}
+.tab-btn:hover { color: var(--ink); background: rgba(253,250,244,0.9); }
+.tab-btn.active {
+  background: var(--bg);
+  color: var(--ink);
+  font-weight: 600;
+  border-color: var(--line);
+  z-index: 3;
+}
+.tab-btn .tab-badge {
+  display: inline-block;
+  background: var(--nok);
+  color: white;
+  font-size: 0.58rem;
+  padding: 0.05rem 0.35rem;
+  border-radius: 99px;
+  margin-left: 0.35rem;
+  vertical-align: middle;
+  font-weight: 700;
+}
+
+/* ══════════════════════════════════════════
+   PAINEL / PAGE
+══════════════════════════════════════════ */
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+.page {
+  max-width: 960px;
+  margin: 0 auto;
+  background: var(--bg);
+  border: 1.5px solid var(--line);
+  border-top: none;
+  box-shadow: 4px 6px 32px rgba(0,0,0,.12);
+  padding: 2.8rem 3.2rem 3rem;
+  position: relative;
+  min-height: 60vh;
+}
+.page::before {
+  content:'';
+  position:absolute;
+  left:0;top:0;bottom:0;
+  width:4px;
+  background: linear-gradient(to bottom,var(--accent),#e07b5a,var(--accent));
+}
+
+/* ══════════════════════════════════════════
+   HEADER
+══════════════════════════════════════════ */
+header {
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 1.4rem;
+  margin-bottom: 1.8rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.label-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.3rem;
+}
+h1 { font-family:'DM Serif Display',serif; font-size:2rem; color:var(--ink); line-height:1.05; }
+.header-right { display:flex; flex-direction:column; gap:0.4rem; align-items:flex-end; }
+.meta-row { display:flex; align-items:center; gap:0.5rem; font-size:0.82rem; color:var(--muted); }
+.meta-input {
+  border:none; border-bottom:1.5px solid var(--line);
+  background:transparent; font-family:'DM Mono',monospace;
+  font-size:0.85rem; color:var(--ink); width:145px;
+  padding:0.1rem 0.2rem; transition:border-color .15s;
+}
+.meta-input:focus { outline:none; border-color:var(--ink); }
+.meta-input::placeholder { color:var(--line); }
+.current-week-badge {
+  font-family:'DM Mono',monospace; font-size:0.72rem;
+  background:var(--accent); color:white; padding:0.15rem 0.6rem; letter-spacing:.05em;
+}
+
+/* ══════════════════════════════════════════
+   SELETOR DE SEMANA
+══════════════════════════════════════════ */
+.week-selector { display:flex; gap:0.4rem; margin-bottom:1.8rem; flex-wrap:wrap; }
+.week-btn {
+  padding:0.35rem 1rem; border:1.5px solid var(--line);
+  background:transparent; font-family:'DM Mono',monospace;
+  font-size:0.73rem; color:var(--muted); cursor:pointer; transition:all .15s; letter-spacing:.05em;
+}
+.week-btn.active,.week-btn:hover { background:var(--ink); color:var(--paper); border-color:var(--ink); }
+
+/* ══════════════════════════════════════════
+   SEÇÃO / TABELA
+══════════════════════════════════════════ */
+.section-title {
+  font-family:'DM Serif Display',serif; font-size:0.95rem; color:var(--muted);
+  letter-spacing:.05em; margin:2rem 0 0.7rem;
+  display:flex; align-items:center; gap:0.6rem;
+}
+.section-title::after { content:''; flex:1; height:1px; background:var(--line); }
+.section-icon { display:inline-block; width:8px; height:8px; background:var(--accent); border-radius:50%; }
+
+table { width:100%; border-collapse:collapse; font-size:0.84rem; }
+thead th {
+  font-family:'DM Mono',monospace; font-size:0.65rem; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--muted); text-align:left;
+  padding:0.45rem 0.55rem; border-bottom:1.5px solid var(--ink);
+}
+
+/* larguras — checklist */
+#tabBolsa thead th:nth-child(1),
+#tabEletric thead th:nth-child(1) { width:3%; }
+#tabBolsa thead th:nth-child(2),
+#tabEletric thead th:nth-child(2) { width:36%; }
+#tabBolsa thead th:nth-child(3),
+#tabEletric thead th:nth-child(3) { width:14%; text-align:center; }
+#tabBolsa thead th:nth-child(4),
+#tabEletric thead th:nth-child(4) { width:20%; text-align:center; }
+#tabBolsa thead th:nth-child(5),
+#tabEletric thead th:nth-child(5) { width:27%; }
+
+tbody tr { border-bottom:1px solid var(--line); transition:background .1s; }
+tbody tr:hover { background:rgba(200,75,49,.03); }
+td { padding:0.5rem 0.55rem; vertical-align:middle; }
+
+.td-num { font-family:'DM Mono',monospace; font-size:0.68rem; color:var(--muted); text-align:right; padding-right:.7rem; }
+.td-name { font-weight:500; color:var(--ink); }
+.td-check { text-align:center; }
+
+/* checkbox */
+.check-box {
+  display:inline-block; width:18px; height:18px;
+  border:1.5px solid var(--line); cursor:pointer;
+  position:relative; vertical-align:middle; transition:all .15s; flex-shrink:0;
+}
+.check-box.checked { background:var(--ok); border-color:var(--ok); }
+.check-box.checked::after {
+  content:'✓'; position:absolute; top:50%; left:50%;
+  transform:translate(-50%,-50%); color:white; font-size:11px; font-weight:700; line-height:1;
+}
+
+/* condition select */
+.condition-select {
+  appearance:none; border:1.5px solid var(--line); background:transparent;
+  font-family:'DM Sans',sans-serif; font-size:0.76rem;
+  padding:0.22rem 1.6rem 0.22rem 0.45rem; color:var(--ink);
+  cursor:pointer; width:100%;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238a8070'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right .45rem center;
+  transition:border-color .15s;
+}
+.condition-select:focus { outline:none; border-color:var(--ink); }
+.condition-select.funcional { color:var(--ok); border-color:var(--ok); }
+.condition-select.irregular { color:var(--nok); border-color:var(--nok); }
+
+/* obs input */
+.obs-input {
+  border:none; border-bottom:1px solid var(--line); background:transparent;
+  font-family:'DM Sans',sans-serif; font-size:0.76rem; color:var(--ink);
+  width:100%; padding:0.18rem 0.1rem; transition:border-color .15s;
+}
+.obs-input:focus { outline:none; border-color:var(--ink); }
+.obs-input::placeholder { color:var(--line); font-style:italic; }
+
+/* ── Assinatura inline por ferramenta ── */
+.td-name-inner { display:flex; flex-direction:column; gap:0.25rem; }
+.td-name-wrap { display:flex; align-items:center; gap:0.35rem; }
+.td-name-wrap .name-text { flex:1; }
+
+.inline-sign {
+  display:none;
+  align-items:center;
+  gap:0.35rem;
+}
+.inline-sign.visible { display:flex; }
+.inline-sign-label {
+  font-family:'DM Mono',monospace; font-size:0.58rem;
+  letter-spacing:.08em; color:var(--nok); text-transform:uppercase;
+  white-space:nowrap; flex-shrink:0;
+}
+.inline-sign-input {
+  flex:1; border:none; border-bottom:1.5px solid var(--nok);
+  background:transparent; font-family:'DM Sans',sans-serif;
+  font-size:0.74rem; color:var(--ink); padding:0.08rem 0.15rem; min-width:0;
+}
+.inline-sign-input:focus { outline:none; border-color:var(--accent); }
+.inline-sign-input::placeholder { color:rgba(200,75,49,.35); font-style:italic; }
+
+/* ── Botões de ação inline ── */
+.btn-row-action {
+  background:none; border:none; cursor:pointer;
+  opacity:0; transition:opacity .15s,color .15s;
+  font-size:0.78rem; padding:0 0.18rem; color:var(--muted); line-height:1;
+}
+tbody tr:hover .btn-row-action { opacity:1; }
+.btn-row-action:hover { color:var(--accent); }
+.btn-row-action.del:hover { color:var(--nok); }
+
+.name-edit-input {
+  flex:1; border:none; border-bottom:1.5px solid var(--ink);
+  background:transparent; font-family:'DM Sans',sans-serif;
+  font-weight:500; font-size:0.84rem; color:var(--ink);
+  padding:0.1rem 0.2rem; min-width:0;
+}
+.name-edit-input:focus { outline:none; }
+
+/* ── Add tool ── */
+.add-tool-row {
+  display:flex; align-items:center; gap:0.5rem;
+  padding:0.55rem 0.55rem 0.55rem 2rem;
+  border-top:1px dashed var(--line); margin-top:0.15rem;
+}
+.add-tool-input {
+  flex:1; border:none; border-bottom:1.5px dashed var(--line);
+  background:transparent; font-family:'DM Sans',sans-serif;
+  font-size:0.8rem; color:var(--ink); padding:0.18rem 0.3rem; transition:border-color .15s;
+}
+.add-tool-input:focus { outline:none; border-color:var(--ink); }
+.add-tool-input::placeholder { color:var(--line); font-style:italic; }
+.btn-add-confirm {
+  padding:0.28rem 0.75rem; background:var(--ink); color:var(--paper);
+  border:none; font-family:'DM Mono',monospace; font-size:0.65rem;
+  letter-spacing:.06em; cursor:pointer; transition:background .15s;
+  text-transform:uppercase; white-space:nowrap;
+}
+.btn-add-confirm:hover { background:var(--green); }
+.btn-add-tool {
+  display:inline-flex; align-items:center; gap:0.3rem; margin-top:0.45rem;
+  padding:0.28rem 0.85rem; border:1.5px dashed var(--line);
+  background:transparent; font-family:'DM Mono',monospace;
+  font-size:0.65rem; letter-spacing:.08em; color:var(--muted);
+  cursor:pointer; transition:all .15s; text-transform:uppercase;
+}
+.btn-add-tool:hover { border-color:var(--green); color:var(--green); }
+
+/* ══════════════════════════════════════════
+   SUMMARY BAR
+══════════════════════════════════════════ */
+.summary-bar {
+  margin-top:2.2rem; padding:1.1rem 1.4rem;
+  border:1.5px solid var(--line);
+  display:flex; gap:1.8rem; align-items:center; flex-wrap:wrap;
+  background:rgba(0,0,0,.015);
+}
+.summary-label { font-family:'DM Mono',monospace; font-size:0.65rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:0.12rem; }
+.summary-val { font-family:'DM Serif Display',serif; font-size:1.7rem; line-height:1; }
+.summary-val.ok { color:var(--ok); }
+.summary-val.nok { color:var(--nok); }
+.summary-val.total { color:var(--ink); }
+
+/* ══════════════════════════════════════════
+   BOTÕES DE AÇÃO
+══════════════════════════════════════════ */
+.action-bar {
+  display:flex; align-items:center; gap:0.55rem;
+  flex-wrap:wrap; margin-top:0.7rem;
+}
+.btn-action {
+  display:inline-flex; align-items:center; gap:0.3rem;
+  padding:0.42rem 0.95rem; border:1.5px solid var(--line);
+  background:transparent; font-family:'DM Mono',monospace;
+  font-size:0.66rem; letter-spacing:.07em; color:var(--muted);
+  cursor:pointer; transition:all .15s; text-transform:uppercase;
+}
+.btn-action:hover { border-color:var(--green); color:var(--green); }
+.btn-action.danger:hover { border-color:var(--nok); color:var(--nok); }
+.btn-action.primary {
+  background:var(--ink); color:var(--paper); border-color:var(--ink);
+}
+.btn-action.primary:hover { background:var(--accent); border-color:var(--accent); }
+
+.save-indicator {
+  font-family:'DM Mono',monospace; font-size:0.63rem; letter-spacing:.06em;
+  color:var(--muted); margin-left:auto; opacity:.65;
+  transition:color .3s,opacity .3s;
+}
+.save-indicator.flash { color:var(--ok); opacity:1; }
+
+/* ══════════════════════════════════════════
+   FOOTER (ASSINATURAS GERAIS)
+══════════════════════════════════════════ */
+.footer-row {
+  margin-top:2.2rem; display:flex; gap:2rem; flex-wrap:wrap;
+  align-items:flex-end; justify-content:space-between;
+}
+.sign-block { flex:1; min-width:160px; }
+.sign-line { border-bottom:1.5px solid var(--ink); height:2rem; margin-bottom:0.3rem; }
+.sign-label {
+  font-family:'DM Mono',monospace; font-size:0.62rem;
+  letter-spacing:.1em; color:var(--muted); text-transform:uppercase;
+}
+
+/* ══════════════════════════════════════════
+   ABA 2 — REGISTROS
+══════════════════════════════════════════ */
+.page-header {
+  display:flex; align-items:flex-end; justify-content:space-between;
+  gap:1rem; flex-wrap:wrap;
+  border-bottom:2px solid var(--ink); padding-bottom:1.2rem; margin-bottom:1.8rem;
+}
+.page-header h2 { font-family:'DM Serif Display',serif; font-size:1.7rem; }
+
+.registros-empty {
+  text-align:center; padding:3rem 1rem;
+  font-family:'DM Mono',monospace; font-size:0.8rem;
+  color:var(--muted); letter-spacing:.07em;
+  border:1.5px dashed var(--line); margin-top:1rem;
+}
+
+.registro-card {
+  border:1.5px solid var(--line); margin-bottom:1rem;
+  overflow:hidden; transition:border-color .15s;
+}
+.registro-card:hover { border-color:var(--ink); }
+
+.registro-header {
+  display:flex; align-items:center; gap:1rem; flex-wrap:wrap;
+  padding:0.9rem 1.2rem; background:rgba(0,0,0,.02);
+  border-bottom:1px solid var(--line); cursor:pointer;
+  user-select:none;
+}
+.registro-header:hover { background:rgba(0,0,0,.04); }
+
+.reg-title { font-weight:600; font-size:0.88rem; }
+.reg-meta  { font-family:'DM Mono',monospace; font-size:0.68rem; color:var(--muted); }
+.reg-stats { display:flex; gap:0.8rem; margin-left:auto; }
+.reg-stat {
+  font-family:'DM Mono',monospace; font-size:0.68rem;
+  padding:0.12rem 0.5rem; letter-spacing:.05em;
+}
+.reg-stat.ok  { background:rgba(45,106,79,.1);  color:var(--ok); }
+.reg-stat.nok { background:rgba(200,75,49,.1); color:var(--nok); }
+.reg-stat.aus { background:rgba(138,128,112,.1); color:var(--muted); }
+
+.reg-chevron {
+  font-size:0.7rem; color:var(--muted); transition:transform .2s; flex-shrink:0;
+}
+.registro-card.open .reg-chevron { transform:rotate(90deg); }
+
+.registro-body { display:none; padding:1rem 1.2rem 1.2rem; }
+.registro-card.open .registro-body { display:block; }
+
+.reg-table { width:100%; border-collapse:collapse; font-size:0.8rem; margin-top:0.5rem; }
+.reg-table thead th {
+  font-family:'DM Mono',monospace; font-size:0.6rem; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--muted);
+  padding:0.35rem 0.45rem; border-bottom:1px solid var(--ink); text-align:left;
+}
+.reg-table tbody tr { border-bottom:1px solid var(--line); }
+.reg-table tbody tr:last-child { border-bottom:none; }
+.reg-table td { padding:0.35rem 0.45rem; vertical-align:middle; }
+
+.reg-badge {
+  display:inline-block; font-family:'DM Mono',monospace; font-size:0.58rem;
+  padding:0.08rem 0.4rem; letter-spacing:.05em; text-transform:uppercase;
+}
+.reg-badge.ok  { background:rgba(45,106,79,.12); color:var(--ok); }
+.reg-badge.nok { background:rgba(200,75,49,.12); color:var(--nok); }
+.reg-badge.aus { background:rgba(138,128,112,.12); color:var(--muted); }
+
+.reg-actions { display:flex; gap:0.5rem; justify-content:flex-end; margin-top:0.8rem; }
+
+/* ══════════════════════════════════════════
+   ABA 3 — PEDIDO DE COMPRA
+══════════════════════════════════════════ */
+.pc-meta-grid {
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
+  gap:1rem; margin-bottom:1.5rem;
+}
+.pc-meta-item {}
+.pc-meta-label {
+  font-family:'DM Mono',monospace; font-size:0.62rem;
+  letter-spacing:.1em; color:var(--muted); text-transform:uppercase; margin-bottom:0.2rem;
+}
+.pc-meta-val {
+  font-size:0.88rem; font-weight:600; color:var(--ink);
+  border-bottom:1.5px solid var(--line); padding-bottom:0.2rem; min-height:1.4rem;
+}
+.pc-meta-input {
+  border:none; border-bottom:1.5px solid var(--line); background:transparent;
+  font-family:'DM Sans',sans-serif; font-size:0.88rem; font-weight:600;
+  color:var(--ink); width:100%; padding:0.1rem 0; transition:border-color .15s;
+}
+.pc-meta-input:focus { outline:none; border-color:var(--ink); }
+.pc-meta-input::placeholder { color:var(--line); font-weight:400; font-style:italic; }
+
+.pc-section-label {
+  font-family:'DM Mono',monospace; font-size:0.63rem; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--muted);
+  margin:1.4rem 0 0.55rem; padding-bottom:0.3rem;
+  border-bottom:1px solid var(--line);
+}
+
+.pc-table { width:100%; border-collapse:collapse; font-size:0.82rem; }
+.pc-table thead th {
+  font-family:'DM Mono',monospace; font-size:0.6rem; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--muted);
+  padding:0.38rem 0.48rem; border-bottom:1px solid var(--ink); text-align:left;
+}
+.pc-table tbody tr { border-bottom:1px solid var(--line); }
+.pc-table tbody tr:last-child { border-bottom:none; }
+.pc-table td { padding:0.42rem 0.48rem; vertical-align:middle; }
+
+.pc-motivo {
+  display:inline-block; font-family:'DM Mono',monospace; font-size:0.6rem;
+  padding:0.08rem 0.38rem; letter-spacing:.05em; text-transform:uppercase;
+}
+.pc-motivo.ausente   { background:rgba(200,75,49,.1);  color:var(--nok); }
+.pc-motivo.irregular { background:rgba(255,160,0,.12); color:#b07000; }
+
+.pc-qty-input {
+  width:50px; border:1px solid var(--line); background:transparent;
+  font-family:'DM Mono',monospace; font-size:0.8rem; color:var(--ink);
+  padding:0.18rem 0.3rem; text-align:center;
+}
+.pc-qty-input:focus { outline:none; border-color:var(--ink); }
+
+.pc-obs-field {
+  width:100%; border:none; border-bottom:1px solid var(--line); background:transparent;
+  font-family:'DM Sans',sans-serif; font-size:0.76rem; color:var(--ink); padding:0.12rem 0;
+}
+.pc-obs-field:focus { outline:none; border-color:var(--ink); }
+.pc-obs-field::placeholder { color:var(--line); font-style:italic; }
+
+.pc-empty {
+  text-align:center; padding:2.5rem 1rem;
+  font-family:'DM Mono',monospace; font-size:0.78rem;
+  color:var(--ok); letter-spacing:.07em;
+  border:1.5px dashed var(--line); margin:1rem 0;
+}
+
+.pc-resumo {
+  margin-top:1rem; padding:0.7rem 1rem;
+  background:rgba(200,75,49,.05); border-left:3px solid var(--nok);
+  font-family:'DM Mono',monospace; font-size:0.66rem; letter-spacing:.07em; color:var(--muted);
+}
+
+.pc-sign-row {
+  display:flex; gap:2rem; flex-wrap:wrap;
+  margin-top:2rem; padding-top:1.5rem; border-top:1px dashed var(--line);
+}
+.pc-sign-block { flex:1; min-width:140px; }
+.pc-sign-line  { border-bottom:1.5px solid var(--ink); height:2rem; margin-bottom:0.3rem; }
+.pc-sign-label { font-family:'DM Mono',monospace; font-size:0.6rem; letter-spacing:.1em; color:var(--muted); text-transform:uppercase; }
+
+/* ══════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════ */
+#toast {
+  position:fixed; bottom:1.8rem; right:1.8rem;
+  background:var(--ink); color:var(--paper);
+  font-family:'DM Mono',monospace; font-size:0.7rem; letter-spacing:.07em;
+  padding:0.55rem 1.1rem; opacity:0; transform:translateY(8px);
+  transition:opacity .2s,transform .2s; pointer-events:none; z-index:9999;
+}
+#toast.show { opacity:1; transform:translateY(0); }
+#toast.ok  { background:var(--ok); }
+#toast.err { background:var(--nok); }
+
+/* ══════════════════════════════════════════
+   PRINT
+══════════════════════════════════════════ */
+@media print {
+  body { background:white; }
+  .tab-nav,.action-bar,.no-print { display:none !important; }
+  .page { box-shadow:none; border:none; padding:1.5rem; }
+  .tab-panel { display:none !important; }
+  .tab-panel.print-target { display:block !important; }
+  .obs-input,.condition-select { border-color:#ccc; }
+  .btn-row-action,.add-tool-row,.btn-add-tool { display:none; }
+  .inline-sign.visible { display:flex; }
+}
+
+@media (max-width:620px) {
+  .page { padding:1.4rem 1.1rem; }
+  h1 { font-size:1.4rem; }
+  table { font-size:0.73rem; }
+  td { padding:0.38rem 0.3rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     NAV DE ABAS
+══════════════════════════════════════════ -->
+<nav class="tab-nav" id="tabNav">
+  <button class="tab-btn active" onclick="goTab('checklist')">✦ Checklist</button>
+  <button class="tab-btn" onclick="goTab('registros')">Registros <span class="tab-badge" id="badgeReg">0</span></button>
+  <button class="tab-btn" onclick="goTab('pedido')">Pedido de Compra <span class="tab-badge" id="badgePC" style="display:none"></span></button>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     ABA 1 — CHECKLIST
+══════════════════════════════════════════ -->
+<div class="tab-panel active" id="panel-checklist">
+<div class="page">
+
+  <header>
+    <div class="header-left">
+      <div class="label-tag">Netway Telecom — Controle de Equipamentos</div>
+      <h1>Checklist de<br>Ferramentas</h1>
+    </div>
+    <div class="header-right">
+      <div class="meta-row">Técnico: <input class="meta-input" id="display-tecnico" placeholder="_______________" /></div>
+      <div class="meta-row">Mês: <input class="meta-input" id="display-mes" placeholder="_______________" /></div>
+      <div class="meta-row">Semana: <span id="display-semana" class="current-week-badge">—</span></div>
+    </div>
+  </header>
+
+  <div class="week-selector no-print">
+    <button class="week-btn active" onclick="setWeek(1)">Semana 1</button>
+    <button class="week-btn"        onclick="setWeek(2)">Semana 2</button>
+    <button class="week-btn"        onclick="setWeek(3)">Semana 3</button>
+    <button class="week-btn"        onclick="setWeek(4)">Semana 4</button>
+  </div>
+
+  <!-- Bolsa de Técnico -->
+  <div class="section-title"><span class="section-icon"></span>Bolsa de Técnico</div>
+  <table id="tabBolsa">
+    <thead><tr><th>#</th><th>Ferramenta</th><th>Na bolsa?</th><th>Condição</th><th>Observação</th></tr></thead>
+    <tbody id="bodyBolsa"></tbody>
+  </table>
+  <div id="addRowBolsa" class="add-tool-row" style="display:none">
+    <input class="add-tool-input" id="addInputBolsa" placeholder="Nome da nova ferramenta…" />
+    <button class="btn-add-confirm" onclick="confirmAdd('bolsa')">+ Adicionar</button>
+    <button class="btn-add-confirm" style="background:var(--muted)" onclick="cancelAdd('bolsa')">Cancelar</button>
+  </div>
+  <button class="btn-add-tool no-print" id="btnAddBolsa" onclick="showAddRow('bolsa')">+ Nova ferramenta</button>
+
+  <!-- Ferramentas Elétricas -->
+  <div class="section-title"><span class="section-icon" style="background:var(--green)"></span>Ferramentas Elétricas / Avulsas</div>
+  <table id="tabEletric">
+    <thead><tr><th>#</th><th>Ferramenta</th><th>Na bolsa?</th><th>Condição</th><th>Observação</th></tr></thead>
+    <tbody id="bodyEletric"></tbody>
+  </table>
+  <div id="addRowEletric" class="add-tool-row" style="display:none">
+    <input class="add-tool-input" id="addInputEletric" placeholder="Nome da nova ferramenta…" />
+    <button class="btn-add-confirm" onclick="confirmAdd('eletric')">+ Adicionar</button>
+    <button class="btn-add-confirm" style="background:var(--muted)" onclick="cancelAdd('eletric')">Cancelar</button>
+  </div>
+  <button class="btn-add-tool no-print" id="btnAddEletric" onclick="showAddRow('eletric')">+ Nova ferramenta</button>
+
+  <!-- Resumo rápido -->
+  <div class="summary-bar">
+    <div><div class="summary-label">Total</div><div class="summary-val total" id="statTotal">0</div></div>
+    <div><div class="summary-label">Presentes</div><div class="summary-val ok" id="statOk">0</div></div>
+    <div><div class="summary-label">Irregulares</div><div class="summary-val nok" id="statNok">0</div></div>
+    <div><div class="summary-label">Ausentes</div><div class="summary-val nok" id="statAus">0</div></div>
+    <div style="margin-left:auto" class="no-print">
+      <button class="btn-action primary" onclick="finalizarChecklist()">✓ Finalizar e Registrar</button>
+    </div>
+  </div>
+
+  <div class="action-bar no-print">
+    <button class="btn-action" onclick="exportJSON()">↓ Exportar JSON</button>
+    <button class="btn-action" onclick="document.getElementById('importFile').click()">↑ Importar JSON</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)" />
+    <button class="btn-action danger" onclick="clearStorage()">⊘ Limpar dados</button>
+    <button class="btn-action" onclick="window.print()">⎙ Imprimir</button>
+    <span class="save-indicator" id="saveIndicator">—</span>
+  </div>
+
+  <!-- Assinatura do checklist -->
+  <div class="footer-row">
+    <div class="sign-block"><div class="sign-line"></div><div class="sign-label">Assinatura do técnico</div></div>
+    <div class="sign-block"><div class="sign-line"></div><div class="sign-label">Supervisor</div></div>
+    <div class="sign-block"><div class="sign-line"></div><div class="sign-label">Data da verificação</div></div>
+  </div>
+
+</div><!-- .page -->
+</div><!-- panel-checklist -->
+
+<!-- ══════════════════════════════════════════
+     ABA 2 — REGISTROS
+══════════════════════════════════════════ -->
+<div class="tab-panel" id="panel-registros">
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <div class="label-tag">Histórico Automático</div>
+      <h2>Registros de Checklist</h2>
+    </div>
+    <div class="no-print" style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
+      <button class="btn-action danger" onclick="limparRegistros()">⊘ Limpar registros</button>
+      <button class="btn-action" onclick="exportarRegistrosJSON()">↓ Exportar registros</button>
+    </div>
+  </div>
+
+  <div id="registros-lista"></div>
+
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     ABA 3 — PEDIDO DE COMPRA
+══════════════════════════════════════════ -->
+<div class="tab-panel" id="panel-pedido">
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <div class="label-tag">Netway Telecom</div>
+      <h2>Pedido de Compra</h2>
+    </div>
+    <div class="no-print" style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
+      <button class="btn-action" onclick="gerarPedido()">↺ Atualizar itens</button>
+      <button class="btn-action" onclick="exportarPedidoJSON()">↓ Exportar JSON</button>
+      <button class="btn-action primary" onclick="imprimirPedido()">⎙ Imprimir Pedido</button>
+    </div>
+  </div>
+
+  <!-- Meta do pedido -->
+  <div class="pc-meta-grid">
+    <div class="pc-meta-item">
+      <div class="pc-meta-label">Nº do Pedido</div>
+      <div class="pc-meta-val" id="pc-numero">—</div>
+    </div>
+    <div class="pc-meta-item">
+      <div class="pc-meta-label">Técnico Solicitante</div>
+      <div class="pc-meta-val" id="pc-tecnico">—</div>
+    </div>
+    <div class="pc-meta-item">
+      <div class="pc-meta-label">Período</div>
+      <div class="pc-meta-val" id="pc-periodo">—</div>
+    </div>
+    <div class="pc-meta-item">
+      <div class="pc-meta-label">Data de Emissão</div>
+      <div class="pc-meta-val" id="pc-data">—</div>
+    </div>
+    <div class="pc-meta-item" style="grid-column:1/-1;">
+      <div class="pc-meta-label">Justificativa / Finalidade</div>
+      <input class="pc-meta-input" id="pc-justificativa" placeholder="Ex.: reposição de equipamentos de campo…" />
+    </div>
+    <div class="pc-meta-item">
+      <div class="pc-meta-label">Centro de Custo</div>
+      <input class="pc-meta-input" id="pc-cc" placeholder="Ex.: Manutenção" />
+    </div>
+    <div class="pc-meta-item">
+      <div class="pc-meta-label">Urgência</div>
+      <select class="pc-meta-input" id="pc-urgencia" style="cursor:pointer">
+        <option>Normal</option><option>Alta</option><option>Crítica</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="pc-conteudo"></div>
+
+  <!-- Assinaturas do pedido -->
+  <div class="pc-sign-row">
+    <div class="pc-sign-block"><div class="pc-sign-line"></div><div class="pc-sign-label">Assinatura do Técnico</div></div>
+    <div class="pc-sign-block"><div class="pc-sign-line"></div><div class="pc-sign-label">Aprovado por / Supervisor</div></div>
+    <div class="pc-sign-block"><div class="pc-sign-line"></div><div class="pc-sign-label">Data da Aprovação</div></div>
+  </div>
+
+</div>
+</div>
+
+<div id="toast"></div>
+
+<!-- ══════════════════════════════════════════
+     SCRIPT
+══════════════════════════════════════════ -->
+<script>
+/* ── Dados padrão ── */
+const DEFAULT_BOLSA = [
+  'Alicate de corte','Alicate de bico','Alicate de desapar fibra',
+  'Decapador de acrílico','Martelo','Power Mitter','Cordão óptico',
+  'Clivador de fibra','Alicate de crimpar RJ','Nível','Chave Phillips',
+  'Chave de fenda','Chave de boca catraca 14/15','Álcool isopropílico',
+  'Caneta óptica','Laser','Trena','Testador de cabo','Chave allen',
+];
+const DEFAULT_ELETRIC = ['Furadeira','Parafusadeira','Broca 6 mm','Broca 10 mm'];
+
+const KEY_CL  = 'netway_checklist_v2';   // checklist atual
+const KEY_REG = 'netway_registros_v2';   // histórico de checklists
+
+let ferramentasBolsa   = [...DEFAULT_BOLSA];
+let ferramentasEletric = [...DEFAULT_ELETRIC];
+let currentWeek = 1;
+let state = {};       // estado do checklist atual
+let registros = [];   // histórico persistido
+let toastTimer = null;
+
+/* ══════════════════════════════════════════
+   ABAS
+══════════════════════════════════════════ */
+function goTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  const idx = ['checklist','registros','pedido'].indexOf(id);
+  document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+  if (id === 'registros') renderRegistros();
+  if (id === 'pedido')    gerarPedido();
+}
+
+/* ══════════════════════════════════════════
+   PERSISTÊNCIA
+══════════════════════════════════════════ */
+function saveChecklist() {
+  const payload = {
+    ferramentasBolsa, ferramentasEletric, state,
+    tecnico: document.getElementById('display-tecnico').value,
+    mes:     document.getElementById('display-mes').value,
+    semana:  currentWeek,
+    savedAt: new Date().toISOString(),
+  };
+  try {
+    localStorage.setItem(KEY_CL, JSON.stringify(payload));
+    flashSave(payload.savedAt);
+  } catch(e) { showToast('Erro ao salvar','err'); }
+}
+
+function loadChecklist() {
+  try {
+    const raw = localStorage.getItem(KEY_CL);
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    if (d.ferramentasBolsa)   ferramentasBolsa   = d.ferramentasBolsa;
+    if (d.ferramentasEletric) ferramentasEletric = d.ferramentasEletric;
+    if (d.state)  state = d.state;
+    if (d.tecnico) document.getElementById('display-tecnico').value = d.tecnico;
+    if (d.mes)     document.getElementById('display-mes').value     = d.mes;
+    if (d.semana)  currentWeek = d.semana;
+    if (d.savedAt) flashSave(d.savedAt, false);
+  } catch(e) {}
+}
+
+function saveRegistros() {
+  try { localStorage.setItem(KEY_REG, JSON.stringify(registros)); } catch(e) {}
+}
+
+function loadRegistros() {
+  try {
+    const raw = localStorage.getItem(KEY_REG);
+    if (raw) registros = JSON.parse(raw);
+  } catch(e) {}
+}
+
+function flashSave(iso, isNew = true) {
+  const el = document.getElementById('saveIndicator');
+  const d  = new Date(iso);
+  const fmt = d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  el.textContent = (isNew ? '✓ Salvo ' : 'Último save: ') + fmt;
+  if (isNew) { el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1800); }
+}
+
+/* ══════════════════════════════════════════
+   STATE
+══════════════════════════════════════════ */
+function buildId(sec, idx) { return `${sec}-${currentWeek}-${idx}`; }
+
+function getState(id) {
+  if (!state[id]) state[id] = { present:false, condition:'', obs:'', assinatura:'' };
+  if (!state[id].assinatura) state[id].assinatura = '';
+  return state[id];
+}
+
+/* ══════════════════════════════════════════
+   SEMANA
+══════════════════════════════════════════ */
+function setWeek(n) {
+  currentWeek = n;
+  document.querySelectorAll('.week-btn').forEach((b,i) => b.classList.toggle('active', i===n-1));
+  document.getElementById('display-semana').textContent = `Semana ${n}`;
+  renderAll();
+}
+
+/* ══════════════════════════════════════════
+   RENDERIZAÇÃO — CHECKLIST
+══════════════════════════════════════════ */
+function buildRow(sec, idx, name) {
+  const id = buildId(sec, idx);
+  const s  = getState(id);
+  const needSign = !s.present || s.condition === 'irregular';
+  const tr = document.createElement('tr');
+  tr.setAttribute('data-row-id', id);
+  const obsVal  = (s.obs        || '').replace(/"/g,'&quot;');
+  const assVal  = (s.assinatura || '').replace(/"/g,'&quot;');
+  tr.innerHTML = `
+    <td class="td-num">${idx+1}</td>
+    <td class="td-name">
+      <div class="td-name-inner">
+        <div class="td-name-wrap">
+          <span class="name-text">${name}</span>
+          <button class="btn-row-action" title="Editar nome" onclick="startEditName(this,'${sec}',${idx})">✎</button>
+          <button class="btn-row-action del" title="Remover" onclick="removeTool('${sec}',${idx})">✕</button>
+        </div>
+        <div class="inline-sign ${needSign?'visible':''}" data-sign-wrap="${id}">
+          <span class="inline-sign-label">Ass.:</span>
+          <input class="inline-sign-input" placeholder="Assinatura do técnico…"
+                 data-sign-id="${id}" value="${assVal}" />
+        </div>
+      </div>
+    </td>
+    <td class="td-check">
+      <div class="check-box ${s.present?'checked':''}" data-id="${id}"></div>
+    </td>
+    <td>
+      <select class="condition-select ${s.condition}" data-id="${id}">
+        <option value="">—</option>
+        <option value="funcional" ${s.condition==='funcional'?'selected':''}>✔ Funcional</option>
+        <option value="irregular" ${s.condition==='irregular'?'selected':''}>✖ Irregular</option>
+      </select>
+    </td>
+    <td>
+      <input class="obs-input" placeholder="anotação…" data-id="${id}" value="${obsVal}" />
+    </td>`;
+  return tr;
+}
+
+function renderTable(bodyId, sec, list) {
+  const tbody = document.getElementById(bodyId);
+  tbody.innerHTML = '';
+  list.forEach((name, i) => tbody.appendChild(buildRow(sec, i, name)));
+}
+
+function renderAll() {
+  renderTable('bodyBolsa',  'bolsa',  ferramentasBolsa);
+  renderTable('bodyEletric','eletric',ferramentasEletric);
+  attachEvents();
+  updateStats();
+}
+
+/* ══════════════════════════════════════════
+   EVENTOS INTERATIVOS
+══════════════════════════════════════════ */
+function attachEvents() {
+  document.querySelectorAll('.check-box').forEach(el => {
+    el.onclick = () => {
+      const id = el.dataset.id;
+      const s  = getState(id);
+      s.present = !s.present;
+      el.classList.toggle('checked', s.present);
+      toggleSign(id);
+      updateStats();
+      saveChecklist();
+    };
+  });
+
+  document.querySelectorAll('.condition-select').forEach(el => {
+    el.onchange = () => {
+      const id = el.dataset.id;
+      getState(id).condition = el.value;
+      el.className = `condition-select ${el.value}`;
+      toggleSign(id);
+      saveChecklist();
+    };
+  });
+
+  document.querySelectorAll('.obs-input').forEach(el => {
+    el.oninput = () => { getState(el.dataset.id).obs = el.value; };
+    el.onblur  = () => saveChecklist();
+  });
+
+  document.querySelectorAll('.inline-sign-input').forEach(el => {
+    el.oninput = () => { getState(el.dataset.signId).assinatura = el.value; };
+    el.onblur  = () => saveChecklist();
+  });
+}
+
+function toggleSign(id) {
+  const s = getState(id);
+  const needSign = !s.present || s.condition === 'irregular';
+  const wrap = document.querySelector(`[data-sign-wrap="${id}"]`);
+  if (wrap) wrap.classList.toggle('visible', needSign);
+}
+
+document.getElementById('display-tecnico').addEventListener('blur', saveChecklist);
+document.getElementById('display-mes').addEventListener('blur', saveChecklist);
+
+/* ══════════════════════════════════════════
+   STATS
+══════════════════════════════════════════ */
+function updateStats() {
+  const all = [
+    ...ferramentasBolsa.map((_,i)  => buildId('bolsa',i)),
+    ...ferramentasEletric.map((_,i) => buildId('eletric',i)),
+  ];
+  let present = 0, irregular = 0;
+  all.forEach(id => {
+    const s = getState(id);
+    if (s.present) present++;
+    if (s.condition === 'irregular') irregular++;
+  });
+  document.getElementById('statTotal').textContent = all.length;
+  document.getElementById('statOk').textContent    = present;
+  document.getElementById('statNok').textContent   = irregular;
+  document.getElementById('statAus').textContent   = all.length - present;
+
+  // Badge da aba Pedido
+  const pendentes = coletarPendentes().length;
+  const badge = document.getElementById('badgePC');
+  if (pendentes > 0) { badge.textContent = pendentes; badge.style.display=''; }
+  else { badge.style.display='none'; }
+}
+
+/* ══════════════════════════════════════════
+   EDITAR / REMOVER / ADICIONAR FERRAMENTA
+══════════════════════════════════════════ */
+function startEditName(btn, sec, idx) {
+  const list = sec==='bolsa' ? ferramentasBolsa : ferramentasEletric;
+  const wrap = btn.closest('.td-name-wrap');
+  const nameSpan = wrap.querySelector('.name-text');
+  const original = list[idx];
+  const input = document.createElement('input');
+  input.className = 'name-edit-input';
+  input.value = original;
+  nameSpan.replaceWith(input);
+  btn.style.display = 'none';
+  input.focus(); input.select();
+  let committed = false;
+  const commit = () => {
+    if (committed) return; committed = true;
+    const val = input.value.trim();
+    if (val && val !== original) { list[idx] = val; saveChecklist(); }
+    renderAll();
+  };
+  input.addEventListener('blur', commit);
+  input.addEventListener('keydown', e => {
+    if (e.key==='Enter') { e.preventDefault(); commit(); }
+    if (e.key==='Escape') { input.value = original; commit(); }
+  });
+}
+
+function removeTool(sec, idx) {
+  const list = sec==='bolsa' ? ferramentasBolsa : ferramentasEletric;
+  if (!confirm(`Remover "${list[idx]}" do checklist?`)) return;
+  list.splice(idx, 1);
+  saveChecklist(); renderAll();
+}
+
+function showAddRow(sec) {
+  const cap = sec[0].toUpperCase()+sec.slice(1);
+  document.getElementById(`addRow${cap}`).style.display = 'flex';
+  document.getElementById(`btnAdd${cap}`).style.display = 'none';
+  const inp = document.getElementById(`addInput${cap}`);
+  inp.value = ''; inp.focus();
+  inp.onkeydown = e => {
+    if (e.key==='Enter')  confirmAdd(sec);
+    if (e.key==='Escape') cancelAdd(sec);
+  };
+}
+function confirmAdd(sec) {
+  const cap  = sec[0].toUpperCase()+sec.slice(1);
+  const name = document.getElementById(`addInput${cap}`).value.trim();
+  if (!name) { document.getElementById(`addInput${cap}`).focus(); return; }
+  (sec==='bolsa' ? ferramentasBolsa : ferramentasEletric).push(name);
+  cancelAdd(sec);
+  saveChecklist(); renderAll();
+}
+function cancelAdd(sec) {
+  const cap = sec[0].toUpperCase()+sec.slice(1);
+  document.getElementById(`addRow${cap}`).style.display = 'none';
+  document.getElementById(`btnAdd${cap}`).style.display = '';
+}
+
+/* ══════════════════════════════════════════
+   FINALIZAR E REGISTRAR
+══════════════════════════════════════════ */
+function finalizarChecklist() {
+  const tecnico = document.getElementById('display-tecnico').value.trim();
+  const mes     = document.getElementById('display-mes').value.trim();
+  if (!tecnico) { showToast('Informe o nome do técnico','err'); document.getElementById('display-tecnico').focus(); return; }
+
+  const all = [
+    ...ferramentasBolsa.map((name,i) => ({ name, id:buildId('bolsa',i),   secao:'Bolsa de Técnico' })),
+    ...ferramentasEletric.map((name,i) => ({ name, id:buildId('eletric',i), secao:'Elétricas / Avulsas' })),
+  ];
+
+  const itens = all.map(({ name, id, secao }) => {
+    const s = getState(id);
+    return {
+      name, secao,
+      present:   s.present,
+      condition: s.condition,
+      obs:       s.obs,
+      assinatura: s.assinatura,
+    };
+  });
+
+  const pendentes = itens.filter(it => !it.present || it.condition==='irregular');
+  const presentes = itens.filter(it => it.present && it.condition!=='irregular');
+
+  const reg = {
+    id:         Date.now(),
+    tecnico,
+    mes,
+    semana:     currentWeek,
+    registradoEm: new Date().toISOString(),
+    itens,
+    resumo: {
+      total:     itens.length,
+      presentes: presentes.length,
+      ausentes:  itens.filter(it => !it.present).length,
+      irregulares: itens.filter(it => it.condition==='irregular').length,
+      pendentes: pendentes.length,
+    },
+  };
+
+  registros.unshift(reg);
+  if (registros.length > 100) registros.length = 100; // limite de registros
+  saveRegistros();
+
+  // Atualizar badge da aba Registros
+  document.getElementById('badgeReg').textContent = registros.length;
+
+  showToast(`Checklist registrado! ${pendentes.length} item(s) pendente(s).`, pendentes.length>0?'':'ok');
+
+  if (pendentes.length > 0) {
+    setTimeout(() => {
+      if (confirm(`${pendentes.length} ferramenta(s) ausente(s) ou danificada(s).\nAbrir Pedido de Compra?`)) {
+        goTab('pedido');
+      }
+    }, 400);
+  }
+}
+
+/* ══════════════════════════════════════════
+   ABA REGISTROS
+══════════════════════════════════════════ */
+function renderRegistros() {
+  const cont = document.getElementById('registros-lista');
+  document.getElementById('badgeReg').textContent = registros.length;
+
+  if (!registros.length) {
+    cont.innerHTML = '<div class="registros-empty">Nenhum checklist registrado ainda.<br>Finalize um checklist na aba ✦ Checklist para criar o primeiro registro.</div>';
+    return;
+  }
+
+  cont.innerHTML = '';
+  registros.forEach((reg, ri) => {
+    const dt = new Date(reg.registradoEm);
+    const dtFmt = dt.toLocaleDateString('pt-BR') + ' ' + dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+
+    const card = document.createElement('div');
+    card.className = 'registro-card';
+    card.innerHTML = `
+      <div class="registro-header" onclick="toggleRegistro(${ri})">
+        <div>
+          <div class="reg-title">${reg.tecnico} — Semana ${reg.semana}</div>
+          <div class="reg-meta">${reg.mes || '—'} &nbsp;·&nbsp; Registrado em ${dtFmt}</div>
+        </div>
+        <div class="reg-stats">
+          <span class="reg-stat ok">${reg.resumo.presentes} ok</span>
+          <span class="reg-stat aus">${reg.resumo.ausentes} aus</span>
+          <span class="reg-stat nok">${reg.resumo.irregulares} irr</span>
+        </div>
+        <span class="reg-chevron">▶</span>
+      </div>
+      <div class="registro-body">
+        ${buildRegTable(reg.itens)}
+        <div class="reg-actions">
+          <button class="btn-action danger" onclick="excluirRegistro(${ri})">✕ Excluir</button>
+          <button class="btn-action" onclick="gerarPedidoDeRegistro(${ri})">⊕ Gerar Pedido de Compra</button>
+        </div>
+      </div>`;
+    cont.appendChild(card);
+  });
+}
+
+function buildRegTable(itens) {
+  if (!itens.length) return '<p style="color:var(--muted);font-size:.8rem;padding:.5rem 0">Sem itens.</p>';
+  const rows = itens.map((it,i) => {
+    let status, cls;
+    if (!it.present)                   { status='Ausente';   cls='aus'; }
+    else if (it.condition==='irregular') { status='Irregular'; cls='nok'; }
+    else                                 { status='OK';        cls='ok';  }
+    const ass = it.assinatura ? `<span style="font-size:.72rem;color:var(--muted)">${it.assinatura}</span>` : '—';
+    return `<tr>
+      <td style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted)">${i+1}</td>
+      <td>${it.name}</td>
+      <td style="font-size:.72rem;color:var(--muted)">${it.secao}</td>
+      <td><span class="reg-badge ${cls}">${status}</span></td>
+      <td style="font-size:.74rem;color:var(--muted)">${it.obs||'—'}</td>
+      <td>${ass}</td>
+    </tr>`;
+  }).join('');
+  return `<table class="reg-table">
+    <thead><tr><th>#</th><th>Ferramenta</th><th>Seção</th><th>Status</th><th>Obs.</th><th>Assinatura</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+function toggleRegistro(idx) {
+  const cards = document.querySelectorAll('.registro-card');
+  cards[idx].classList.toggle('open');
+}
+
+function excluirRegistro(idx) {
+  if (!confirm('Excluir este registro?')) return;
+  registros.splice(idx, 1);
+  saveRegistros();
+  renderRegistros();
+  showToast('Registro excluído', 'ok');
+}
+
+function limparRegistros() {
+  if (!confirm('Limpar TODOS os registros? Esta ação é irreversível.')) return;
+  registros = [];
+  saveRegistros();
+  renderRegistros();
+  showToast('Registros apagados', 'ok');
+}
+
+function exportarRegistrosJSON() {
+  const blob = new Blob([JSON.stringify(registros, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `registros_checklist_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('Registros exportados!', 'ok');
+}
+
+/* ══════════════════════════════════════════
+   ABA PEDIDO DE COMPRA
+══════════════════════════════════════════ */
+function coletarPendentes() {
+  const secs = [
+    {label:'Bolsa de Técnico',       list:ferramentasBolsa,   key:'bolsa'},
+    {label:'Elétricas / Avulsas',    list:ferramentasEletric, key:'eletric'},
+  ];
+  const result = [];
+  secs.forEach(sec => {
+    sec.list.forEach((name, i) => {
+      const id = buildId(sec.key, i);
+      const s  = getState(id);
+      if (!s.present)                   result.push({id, name, secao:sec.label, motivo:'Ausente',   assinatura:s.assinatura||'', obs:s.obs||''});
+      else if (s.condition==='irregular') result.push({id, name, secao:sec.label, motivo:'Irregular', assinatura:s.assinatura||'', obs:s.obs||''});
+    });
+  });
+  return result;
+}
+
+let _pedidoOrigem = null; // 'atual' ou índice de registro
+
+function gerarPedido(registroItens) {
+  _pedidoOrigem = registroItens ? 'registro' : 'atual';
+  const itens = registroItens || coletarPendentes();
+  const tecnico  = document.getElementById('display-tecnico').value || '—';
+  const mes      = document.getElementById('display-mes').value || '—';
+  const semana   = `Semana ${currentWeek}`;
+  const hoje     = new Date().toLocaleDateString('pt-BR');
+  const num      = `PC-${new Date().getFullYear().toString().slice(2)}${String(new Date().getMonth()+1).padStart(2,'0')}-${String(Math.floor(Math.random()*900)+100)}`;
+
+  document.getElementById('pc-numero').textContent  = num;
+  document.getElementById('pc-tecnico').textContent = tecnico;
+  document.getElementById('pc-periodo').textContent = `${mes} / ${semana}`;
+  document.getElementById('pc-data').textContent    = hoje;
+
+  const cont = document.getElementById('pc-conteudo');
+  cont.innerHTML = '';
+
+  if (!itens.length) {
+    cont.innerHTML = '<div class="pc-empty">✓ Nenhum item pendente — todas as ferramentas estão OK.</div>';
+    return;
+  }
+
+  // Agrupa por seção
+  const grupos = {};
+  itens.forEach(it => { if(!grupos[it.secao]) grupos[it.secao]=[]; grupos[it.secao].push(it); });
+
+  Object.entries(grupos).forEach(([secao, lista]) => {
+    const lbl = document.createElement('div');
+    lbl.className = 'pc-section-label';
+    lbl.textContent = secao;
+    cont.appendChild(lbl);
+
+    const tbl = document.createElement('table');
+    tbl.className = 'pc-table';
+    tbl.innerHTML = `<thead><tr>
+      <th style="width:3%">#</th>
+      <th style="width:32%">Ferramenta</th>
+      <th style="width:14%">Motivo</th>
+      <th style="width:9%;text-align:center">Qtd.</th>
+      <th style="width:24%">Observação</th>
+      <th style="width:18%">Assinatura</th>
+    </tr></thead><tbody></tbody>`;
+
+    const tbody = tbl.querySelector('tbody');
+    lista.forEach((it, idx) => {
+      const tr = document.createElement('tr');
+      const obsV = (it.obs||'').replace(/"/g,'&quot;');
+      const assV = (it.assinatura||'').replace(/"/g,'&quot;');
+      const cls  = it.motivo==='Ausente' ? 'ausente' : 'irregular';
+      tr.innerHTML = `
+        <td style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted)">${idx+1}</td>
+        <td style="font-weight:500">${it.name}</td>
+        <td><span class="pc-motivo ${cls}">${it.motivo}</span></td>
+        <td style="text-align:center"><input class="pc-qty-input" type="number" min="1" value="1" data-pc-id="${it.id||idx}" /></td>
+        <td><input class="pc-obs-field" placeholder="detalhe…" value="${obsV}" data-pc-obs="${it.id||idx}" /></td>
+        <td><input class="pc-obs-field" placeholder="assinar…" value="${assV}" data-pc-ass="${it.id||idx}" /></td>`;
+      tbody.appendChild(tr);
+    });
+    cont.appendChild(tbl);
+  });
+
+  const total = itens.length;
+  const ausentes    = itens.filter(i=>i.motivo==='Ausente').length;
+  const irregulares = itens.filter(i=>i.motivo==='Irregular').length;
+  const res = document.createElement('div');
+  res.className = 'pc-resumo';
+  res.innerHTML = `Total: <strong style="color:var(--ink)">${total}</strong> &nbsp;|&nbsp; Ausentes: <strong style="color:var(--nok)">${ausentes}</strong> &nbsp;|&nbsp; Irregulares: <strong style="color:#b07000">${irregulares}</strong>`;
+  cont.appendChild(res);
+}
+
+function gerarPedidoDeRegistro(idx) {
+  const reg = registros[idx];
+  if (!reg) return;
+  const pendentes = reg.itens
+    .filter(it => !it.present || it.condition==='irregular')
+    .map(it => ({
+      name: it.name, secao: it.secao,
+      motivo: !it.present ? 'Ausente' : 'Irregular',
+      assinatura: it.assinatura||'', obs: it.obs||'',
+    }));
+  // Atualizar meta do pedido com dados do registro
+  document.getElementById('display-tecnico').value = reg.tecnico;
+  document.getElementById('display-mes').value     = reg.mes;
+  currentWeek = reg.semana;
+  goTab('pedido');
+  gerarPedido(pendentes);
+}
+
+function imprimirPedido() {
+  // Marca só a aba do pedido para impressão
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('print-target'));
+  document.getElementById('panel-pedido').classList.add('print-target');
+  window.print();
+  document.getElementById('panel-pedido').classList.remove('print-target');
+}
+
+function exportarPedidoJSON() {
+  const itens = coletarPendentes();
+  const payload = {
+    tipo:'pedido_compra',
+    numero:        document.getElementById('pc-numero').textContent,
+    emitidoEm:     new Date().toISOString(),
+    tecnico:       document.getElementById('pc-tecnico').textContent,
+    periodo:       document.getElementById('pc-periodo').textContent,
+    justificativa: document.getElementById('pc-justificativa').value,
+    centroCusto:   document.getElementById('pc-cc').value,
+    urgencia:      document.getElementById('pc-urgencia').value,
+    itens: itens.map(it => {
+      const qtyEl = document.querySelector(`[data-pc-id="${it.id}"]`);
+      const obsEl = document.querySelector(`[data-pc-obs="${it.id}"]`);
+      const assEl = document.querySelector(`[data-pc-ass="${it.id}"]`);
+      return { ...it,
+        quantidade: qtyEl ? Number(qtyEl.value) : 1,
+        obs:        obsEl ? obsEl.value : it.obs,
+        assinatura: assEl ? assEl.value : it.assinatura,
+      };
+    }),
+  };
+  const blob = new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `pedido_compra_${payload.numero}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('Pedido exportado!','ok');
+}
+
+/* ══════════════════════════════════════════
+   EXPORT / IMPORT JSON (checklist)
+══════════════════════════════════════════ */
+function exportJSON() {
+  const payload = {
+    versao:2, exportadoEm:new Date().toISOString(),
+    tecnico: document.getElementById('display-tecnico').value,
+    mes:     document.getElementById('display-mes').value,
+    ferramentasBolsa, ferramentasEletric, state,
+  };
+  const blob = new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `checklist_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('JSON exportado!','ok');
+}
+
+function importJSON(ev) {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const d = JSON.parse(e.target.result);
+      if (!d.ferramentasBolsa || !d.ferramentasEletric) throw new Error('Formato inválido');
+      ferramentasBolsa   = d.ferramentasBolsa;
+      ferramentasEletric = d.ferramentasEletric;
+      state              = d.state || {};
+      if (d.tecnico) document.getElementById('display-tecnico').value = d.tecnico;
+      if (d.mes)     document.getElementById('display-mes').value     = d.mes;
+      saveChecklist(); renderAll();
+      showToast('Dados importados!','ok');
+    } catch { showToast('Arquivo inválido','err'); }
+    ev.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+function clearStorage() {
+  if (!confirm('Limpar todos os dados do checklist atual e restaurar a lista padrão?')) return;
+  localStorage.removeItem(KEY_CL);
+  ferramentasBolsa   = [...DEFAULT_BOLSA];
+  ferramentasEletric = [...DEFAULT_ELETRIC];
+  state = {};
+  document.getElementById('display-tecnico').value = '';
+  document.getElementById('display-mes').value     = '';
+  document.getElementById('saveIndicator').textContent = '—';
+  renderAll();
+  showToast('Dados apagados','ok');
+}
+
+/* ══════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════ */
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.className = ''; }, 2600);
+}
+
+/* ══════════════════════════════════════════
+   INIT
+══════════════════════════════════════════ */
+loadChecklist();
+loadRegistros();
+document.getElementById('badgeReg').textContent = registros.length;
+setWeek(currentWeek);
+</script>
+</body>
+</html>
